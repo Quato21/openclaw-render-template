@@ -13,6 +13,12 @@ services:
         generateValue: true
       - key: PORT
         value: 3000
+      # Tailscale auth key for joining the tailnet (set value in Render dashboard)
+      - key: TS_AUTHKEY
+        sync: false
+      # Optional override of the hostname used in tailnet (defaults to alphaclaw-le9a)
+      - key: TS_HOSTNAME
+        value: alphaclaw-le9a
     disk:
       name: openclaw-data
       mountPath: /data
