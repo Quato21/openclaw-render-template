@@ -54,6 +54,20 @@ else
   echo "[entrypoint] TS_AUTHKEY not set — skipping Tailscale join (gateway will run loopback-only)"
 fi
 
-# ---- 3. Hand off to alphaclaw ----
+# ---- 3. Python venv + edgartools (SEC EDGAR research) ----
+# Persistent venv on /data so it survives Render redeploys without re-installing on every boot.
+if [ ! -x /data/python-envs/edgar/bin/python ]; then
+  echo "[entrypoint] bootstrapping edgartools venv (first boot or post-disk-wipe)..."
+  apt-get update -q >/dev/null 2>&1 && apt-get install -y --no-install-recommends python3-pip python3-venv >/dev/null 2>&1 || true
+  mkdir -p /data/python-envs
+  python3 -m venv /data/python-envs/edgar
+  /data/python-envs/edgar/bin/pip install --upgrade pip >/dev/null 2>&1
+  /data/python-envs/edgar/bin/pip install edgartools >/dev/null 2>&1
+  echo "[entrypoint] edgartools $(/data/python-envs/edgar/bin/python -c 'import edgar; print(edgar.__version__)' 2>/dev/null) installed at /data/python-envs/edgar"
+else
+  echo "[entrypoint] edgartools venv already present at /data/python-envs/edgar (skipping install)"
+fi
+
+# ---- 4. Hand off to alphaclaw ----
 echo "[entrypoint] starting alphaclaw..."
 exec alphaclaw start
